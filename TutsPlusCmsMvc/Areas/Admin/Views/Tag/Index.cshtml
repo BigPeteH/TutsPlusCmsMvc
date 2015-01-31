@@ -1,0 +1,32 @@
+﻿@model IEnumerable<string>
+
+@{
+    ViewBag.Title = "Index";
+    Layout = "~/Areas/Admin/Views/Post/_PostLayout.cshtml";
+}
+
+<h2>Index</h2>
+
+<table class="table">
+    <tr>
+        <th>
+            Tag Name
+        </th>
+
+        <th></th>
+    </tr>
+
+@foreach (var item in Model) {
+    <tr>
+        <td>
+            @item
+        </td>
+
+        <td>
+            @Html.ActionLink("Edit", "Edit", new { id=item }) |
+            @Html.ActionLink("Delete", "Delete", new { id=item })
+        </td>
+    </tr>
+}
+
+</table>
