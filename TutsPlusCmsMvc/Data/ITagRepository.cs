@@ -11,7 +11,7 @@ namespace TutsPlusCmsMvc.Data
         void Delete(string item);
         void Edit(string existingItem, string newItem);
         void Add(string item);
-        bool Exists(string item);
         IEnumerable<string> GetAll();
+        string Get(string item);
     }
 }

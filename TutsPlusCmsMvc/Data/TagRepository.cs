@@ -2,6 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
+using System.Web.DynamicData;
+using System.Web.UI.WebControls;
+using TutsPlusCmsMvc.Models;
 
 namespace TutsPlusCmsMvc.Data
 {
@@ -9,12 +12,51 @@ namespace TutsPlusCmsMvc.Data
     {
         public void Delete(string item)
         {
-            throw new NotImplementedException();
+            using (var db = new CmsContext())
+            {
+                var posts = db.Posts.Where(p => p.CombinedTags.Contains(item)).ToList();
+                
+                posts = posts.Where(p =>
+                    p.Tags.Contains(item, StringComparer.CurrentCultureIgnoreCase))
+                    .ToList();
+
+                if (!posts.Any())
+                {
+                    throw new KeyNotFoundException(String.Format("The tag {0} does not exist.", item));
+                }
+
+                foreach (var post in posts)
+                {
+                    post.Tags.Remove(item);
+                }
+
+                db.SaveChanges();
+            }
         }
 
         public void Edit(string existingItem, string newItem)
         {
-            throw new NotImplementedException();
+            using (var db = new CmsContext())
+            {
+                var posts = db.Posts.Where(p => p.CombinedTags.Contains(existingItem)).ToList();
+                
+                posts = posts.Where(p => 
+                    p.Tags.Contains(existingItem, StringComparer.CurrentCultureIgnoreCase))
+                    .ToList();
+
+                if (!posts.Any())
+                {
+                    throw new KeyNotFoundException(String.Format("The tag {0} does not exist.", existingItem));
+                }
+
+                foreach (var post in posts)
+                {
+                    post.Tags.Remove(existingItem);
+                    post.Tags.Add(newItem);
+                }
+
+                db.SaveChanges();
+            }
         }
 
         public void Add(string item)
@@ -22,14 +64,32 @@ namespace TutsPlusCmsMvc.Data
             throw new NotImplementedException();
         }
 
-        public bool Exists(string item)
+        public string Get(string item)
         {
-            throw new NotImplementedException();
+            using (var db = new CmsContext())
+            {
+                var posts = db.Posts.Where(p => p.CombinedTags.Contains(item)).ToList();
+
+                posts = posts.Where(p =>
+                    p.Tags.Contains(item, StringComparer.CurrentCultureIgnoreCase))
+                    .ToList();
+
+                if (!posts.Any())
+                {
+                    throw new KeyNotFoundException(String.Format("The tag {0} does not exist.", item));
+                }
+
+                return item.ToLower();
+            }
         }
 
         public IEnumerable<string> GetAll()
         {
-            throw new NotImplementedException();
+            using (var db = new CmsContext())
+            {
+                var tagsCollection = db.Posts.Select(p => p.CombinedTags).ToList();
+                return string.Join(",", tagsCollection).Split(',').Distinct();
+            }
         }
     }
 }

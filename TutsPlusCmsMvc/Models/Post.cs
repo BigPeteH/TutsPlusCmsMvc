@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Web;
 
@@ -29,7 +30,8 @@ namespace TutsPlusCmsMvc.Models
         
         public string AuthorId { get; set; }
 
-        publicv
+        [ForeignKey("AuthorId")]
+        public virtual CmsUser Author { get; set; }
 
         public IList<string> Tags
         {

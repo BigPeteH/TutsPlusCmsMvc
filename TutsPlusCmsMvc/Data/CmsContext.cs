@@ -11,7 +11,7 @@ namespace TutsPlusCmsMvc.Data
 {
     public class CmsContext : IdentityDbContext<CmsUser>
     {
-        public DbSet<Post> Posts;
+        public DbSet<Post>  Posts { get; set; }
 
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
         {
@@ -19,8 +19,11 @@ namespace TutsPlusCmsMvc.Data
 
             modelBuilder.Entity<Post>()
                 .HasKey(e => e.Id)
-                .Property(e =>e.Id)
+                .Property(e => e.Id)
                 .HasDatabaseGeneratedOption(DatabaseGeneratedOption.None);
+
+            modelBuilder.Entity<Post>()
+                .HasRequired(e => e.Author);
         }
     }
 }

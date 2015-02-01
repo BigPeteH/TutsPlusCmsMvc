@@ -1,0 +1,15 @@
+﻿@model TutsPlusCmsMvc.Models.Post
+
+@{
+    ViewBag.Title = "Delete";
+    Layout = "~/Areas/Admin/Views/Post/_PostLayout.cshtml";
+}
+
+<h2>Delete @Model.Title</h2>
+
+@using (var frm = Html.BeginForm())
+{
+    @Html.AntiForgeryToken()
+    <input type="submit" value="Delete Post"/>
+}
+

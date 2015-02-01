@@ -5,6 +5,7 @@ using System.Linq;
 using System.Web;
 using System.Web.Mvc;
 using System.Web.Routing;
+using TutsPlusCmsMvc.App_Start;
 using TutsPlusCmsMvc.Models;
 using TutsPlusCmsMvc.Models.ModelBinders;
 
@@ -14,8 +15,10 @@ namespace TutsPlusCmsMvc
     {
         protected void Application_Start()
         {
-            AreaRegistration.RegisterAllAreas();
             RouteConfig.RegisterRoutes(RouteTable.Routes);
+            AreaRegistration.RegisterAllAreas();
+            AuthDbConfig.RegisterAdminAsync();
+            AuthDbConfig.RegisterRoles();
 
             ModelBinders.Binders.Add(typeof(Post), new PostModelBinder());
         }

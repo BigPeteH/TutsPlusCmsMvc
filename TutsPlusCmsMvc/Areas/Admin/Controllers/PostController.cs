@@ -3,8 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 using System.Web.Mvc;
+using Microsoft.AspNet.Identity;
 using TutsPlusCmsMvc.Data;
 using TutsPlusCmsMvc.Models;
+using TutsPlusCmsMvc.Utility;
 
 namespace TutsPlusCmsMvc.Areas.Admin.Controllers
 {
@@ -23,10 +25,11 @@ namespace TutsPlusCmsMvc.Areas.Admin.Controllers
 
         public PostController(IPostRepository repository)
         {
-            this._repository = repository;
+            _repository = repository;
         }
         
         // GET: admin/post
+        [Route("")]
         public ActionResult Index()
         {
             var allPosts = _repository.GetAll();
@@ -39,9 +42,7 @@ namespace TutsPlusCmsMvc.Areas.Admin.Controllers
         [HttpGet]
         public ActionResult Create()
         {
-            var model = new Post() {Tags= new List<string> {"test-1", "test-2"}};
-
-            return View(model);
+            return View(new Post());
         }
 
         // /admin/post/create
@@ -55,10 +56,28 @@ namespace TutsPlusCmsMvc.Areas.Admin.Controllers
                 return View(model);
             }
 
-            //TODO: insert model in data store
-            _repository.Create(model);
+            if (string.IsNullOrWhiteSpace(model.Id))
+            {
+                model.Id = model.Title;
+            }
 
-            return RedirectToAction("Index");
+            model.Id = model.Id.MakeUrlFriendly();
+            model.Tags = model.Tags.Select(t => t.MakeUrlFriendly()).ToList();
+            model.Created = DateTime.Now;
+
+            model.AuthorId = "8dc5e0f1-9ffb-4eb6-bcd8-dfd3c5162c62";
+
+            //TODO: insert model in data store
+            try
+            {
+                _repository.Create(model);
+                return RedirectToAction("Index");
+            }
+            catch (Exception e)
+            {
+                ModelState.AddModelError(string.Empty, e.Message);
+                return View(model);
+            }
         }
 
 
@@ -68,7 +87,6 @@ namespace TutsPlusCmsMvc.Areas.Admin.Controllers
         [HttpGet]
         public ActionResult Edit(string postId)
         {
-            //TODO: retrieve the model for this id from the data store
             var post = _repository.Get(postId);
 
             if (post == null)
@@ -85,22 +103,66 @@ namespace TutsPlusCmsMvc.Areas.Admin.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult Edit(string postId, Post model)
         {
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+
+            if (string.IsNullOrWhiteSpace(model.Id))
+            {
+                model.Id = model.Title;
+            }
+
+            model.Id = model.Id.MakeUrlFriendly();
+            model.Tags = model.Tags.Select(t => t.MakeUrlFriendly()).ToList();
+
+            try
+            {
+                _repository.Edit(postId, model);
+
+                return RedirectToAction("Index");
+            }
+            catch (KeyNotFoundException)
+            {
+                return HttpNotFound();
+            }
+            catch (Exception e)
+            {
+                ModelState.AddModelError(string.Empty, e.Message);
+                return View(model);
+            }
+        }
+
+        // /admin/post/delete/idstring
+        [Route("delete/{postId}")]
+        [HttpGet]
+        public ActionResult Delete(string postId)
+        {
             var post = _repository.Get(postId);
 
             if (post == null)
             {
                 return HttpNotFound();
             }
-            
-            if (!ModelState.IsValid)
+
+            return View(post);
+        }
+
+        // /admin/post/delete/idstring
+        [Route("delete/{postId}")]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult Delete(string postId, bool? confirm)
+        {
+            try
             {
-                return View(model);
+                _repository.Delete(postId);
+                return RedirectToAction("Index");
             }
-
-            //TODO: update model in data store
-            _repository.Edit(postId, model);
-
-            return RedirectToAction("Index");
+            catch (KeyNotFoundException)
+            {
+                return HttpNotFound();
+            }
         }
     }
 }

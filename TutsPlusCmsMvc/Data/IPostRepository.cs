@@ -13,5 +13,6 @@ namespace TutsPlusCmsMvc.Data
         void Edit(string id, Post updatedItem);
         void Create(Post item);
         IEnumerable<Post> GetAll();
+        void Delete(string id);
     }
 }
